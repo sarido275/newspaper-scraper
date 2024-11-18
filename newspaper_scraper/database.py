@@ -216,7 +216,9 @@ class Database:
                       'df_processed': 'tblArticlesProcessed'}[data_name]
 
         try:
-            _df.to_sql(table_name, self._conn, index_label='URL', if_exists=mode)
+            with sqlite3.connect(self.db_file) as conn:
+                _df.to_sql(table_name, conn, if_exists=mode, index_label='URL')
+                conn.commit()
         except sqlite3.OperationalError:
             # Add the missing column, if new columns were added to the DataFrame and are not in the database yet
             self._cur.execute(f"PRAGMA table_info({table_name})")
